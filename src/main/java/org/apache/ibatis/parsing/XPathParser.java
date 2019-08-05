@@ -45,13 +45,47 @@ import org.xml.sax.SAXParseException;
  */
 public class XPathParser {
 
+  /**
+   * XML Document 对象
+   * DOM对象
+   */
   private final Document document;
+
+  /**
+   * 是否校验XML
+   * 一般值为true
+   */
   private boolean validation;
+
+  /**
+   * XML 实体解析器
+   * 对XML校验时, 会基于XML文档开始位置指定的DTD或者XSD文件
+   * 但是如果环境在没有网络甚至网络极差时, 就无法校验了
+   * 所以mybatis内置了类似DTD的功能  也就是这个EntityResolver
+   */
   private EntityResolver entityResolver;
+
+  /**
+   * 变量 properties 对象
+   * 用来替换动态配置的属性值
+   *
+   * 比如xml文件中引入了.properties文件
+   * 然后在dataSource中使用${}获取属性值
+   * 这个时候就需要用该对象来获取
+   *
+   * 数据来源:  .properties  <property /> 标签
+   */
   private Properties variables;
+
+  /**
+   * Java XPath 对象
+   * 用于查询XML中的节点和元素
+   */
   private XPath xpath;
 
   public XPathParser(String xml) {
+
+    // 获取 XPath 对象
     commonConstructor(false, null, null);
     this.document = createDocument(new InputSource(new StringReader(xml)));
   }
@@ -111,6 +145,13 @@ public class XPathParser {
     this.document = document;
   }
 
+  /**
+   * 构造 XPathParser 对象
+   * @param xml XML 文件地址
+   * @param validation 是否校验
+   * @param variables properties相关
+   * @param entityResolver XML实体解析器  类似DTD
+   */
   public XPathParser(String xml, boolean validation, Properties variables, EntityResolver entityResolver) {
     commonConstructor(validation, variables, entityResolver);
     this.document = createDocument(new InputSource(new StringReader(xml)));
@@ -135,12 +176,21 @@ public class XPathParser {
     this.variables = variables;
   }
 
+
+  // **************** eval方法族开始 ************************************************
+  // eval元素
+  // 获取相对应类型的元素的值
   public String evalString(String expression) {
     return evalString(document, expression);
   }
 
   public String evalString(Object root, String expression) {
+
+    // 1. 获取值
     String result = (String) evaluate(expression, root, XPathConstants.STRING);
+
+    // 2. 基于 variables 替换动态值, 如果 result 为动态值
+    // 此方法点进去就会发现 ${}的出处
     result = PropertyParser.parse(result, variables);
     return result;
   }
@@ -218,6 +268,14 @@ public class XPathParser {
     return new XNode(this, node, variables);
   }
 
+  /**
+   * 获得指定元素或节点的值
+   *
+   * @param expression 表达式
+   * @param root
+   * @param returnType
+   * @return
+   */
   private Object evaluate(String expression, Object root, QName returnType) {
     try {
       return xpath.evaluate(expression, root, returnType);
@@ -226,9 +284,18 @@ public class XPathParser {
     }
   }
 
+  // **************** eval方法族结束 ************************************************
+
+  /**
+   * 通过该方法解析XML 并返回Document对象
+   * @param inputSource
+   * @return
+   */
   private Document createDocument(InputSource inputSource) {
     // important: this must only be called AFTER common constructor
     try {
+
+      // 1. 创建 DocumentBuilderFactory对象
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
       factory.setValidating(validation);
 
@@ -238,8 +305,11 @@ public class XPathParser {
       factory.setCoalescing(false);
       factory.setExpandEntityReferences(true);
 
+      // 2. 创建 DocumentBuilder对象
       DocumentBuilder builder = factory.newDocumentBuilder();
+      // 设置XML实体解析器
       builder.setEntityResolver(entityResolver);
+      // 不实现东西
       builder.setErrorHandler(new ErrorHandler() {
         @Override
         public void error(SAXParseException exception) throws SAXException {
@@ -255,16 +325,26 @@ public class XPathParser {
         public void warning(SAXParseException exception) throws SAXException {
         }
       });
+
+      // 3. 通过 DocumentBuilder对象, 解析xml文件, 获取 Document对象
       return builder.parse(inputSource);
     } catch (Exception e) {
       throw new BuilderException("Error creating document instance.  Cause: " + e, e);
     }
   }
 
+  /**
+   * 通过此方法获取XPath查询XML工具
+   * @param validation
+   * @param variables
+   * @param entityResolver
+   */
   private void commonConstructor(boolean validation, Properties variables, EntityResolver entityResolver) {
     this.validation = validation;
     this.entityResolver = entityResolver;
     this.variables = variables;
+
+    // 创建 XPathFactory对象,  联系XPath解析XML学习
     XPathFactory factory = XPathFactory.newInstance();
     this.xpath = factory.newXPath();
   }
