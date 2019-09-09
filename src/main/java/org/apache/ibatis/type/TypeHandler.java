@@ -25,6 +25,18 @@ import java.sql.SQLException;
  */
 public interface TypeHandler<T> {
 
+  /**
+   * 设置 PreparedStatement 的指定参数
+   *
+   * JavaType => JDBC Type
+   *
+   *
+   * @param ps preparedStatement对象
+   * @param i 参数占位符的位置
+   * @param parameter 参数
+   * @param jdbcType JDBC 类型
+   * @throws SQLException
+   */
   void setParameter(PreparedStatement ps, int i, T parameter, JdbcType jdbcType) throws SQLException;
 
   /**

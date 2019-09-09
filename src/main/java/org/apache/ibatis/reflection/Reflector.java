@@ -45,10 +45,25 @@ import org.apache.ibatis.reflection.property.PropertyNamer;
  *
  * @author Clinton Begin
  */
+
+/**
+ * 一个Reflector对应一个类
+ */
 public class Reflector {
 
+  /**
+   * 对应的类
+   */
   private final Class<?> type;
+
+  /**
+   * 可读属性数组 getter
+   */
   private final String[] readablePropertyNames;
+
+  /**
+   * 可写属性数组 setter
+   */
   private final String[] writablePropertyNames;
   private final Map<String, Invoker> setMethods = new HashMap<>();
   private final Map<String, Invoker> getMethods = new HashMap<>();

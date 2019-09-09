@@ -153,7 +153,9 @@ public class XPathParser {
    * @param entityResolver XML实体解析器  类似DTD
    */
   public XPathParser(String xml, boolean validation, Properties variables, EntityResolver entityResolver) {
+    // 对XPathParser进行初始化配置, 调用XPathFactory#newInstance方法获取XPath对象
     commonConstructor(validation, variables, entityResolver);
+    // 将XML文件解析成Document对象
     this.document = createDocument(new InputSource(new StringReader(xml)));
   }
 
@@ -243,12 +245,20 @@ public class XPathParser {
     return (Double) evaluate(expression, root, XPathConstants.NUMBER);
   }
 
+  /**
+   * evalNode  eval节点
+   * @param expression
+   * @return
+   */
   public List<XNode> evalNodes(String expression) {
     return evalNodes(document, expression);
   }
 
   public List<XNode> evalNodes(Object root, String expression) {
+    // node 数组
+    // 1. 获取 node 数组
     List<XNode> xnodes = new ArrayList<>();
+    // 2. 封装成 xnodes数组
     NodeList nodes = (NodeList) evaluate(expression, root, XPathConstants.NODESET);
     for (int i = 0; i < nodes.getLength(); i++) {
       xnodes.add(new XNode(this, nodes.item(i), variables));
@@ -256,15 +266,18 @@ public class XPathParser {
     return xnodes;
   }
 
-  public XNode evalNode(String expression) {
+  public XNode evalNode(String expression) { // Node对象
     return evalNode(document, expression);
   }
 
   public XNode evalNode(Object root, String expression) {
+    // Node对象
+    // 1. 获得node对象
     Node node = (Node) evaluate(expression, root, XPathConstants.NODE);
     if (node == null) {
       return null;
     }
+    // 2.封装成node对象
     return new XNode(this, node, variables);
   }
 
@@ -272,8 +285,8 @@ public class XPathParser {
    * 获得指定元素或节点的值
    *
    * @param expression 表达式
-   * @param root
-   * @param returnType
+   * @param root 指定节点
+   * @param returnType 返回类型
    * @return
    */
   private Object evaluate(String expression, Object root, QName returnType) {

@@ -37,7 +37,10 @@ public class XMLMapperEntityResolver implements EntityResolver {
   private static final String MYBATIS_CONFIG_SYSTEM = "mybatis-3-config.dtd";
   private static final String MYBATIS_MAPPER_SYSTEM = "mybatis-3-mapper.dtd";
 
+  // 本地 mybatis-3-config.dtd config配置文件dtd
   private static final String MYBATIS_CONFIG_DTD = "org/apache/ibatis/builder/xml/mybatis-3-config.dtd";
+
+  // 本地 mybatis-3-mapper.dtd mapper配置文件dtd
   private static final String MYBATIS_MAPPER_DTD = "org/apache/ibatis/builder/xml/mybatis-3-mapper.dtd";
 
   /**
@@ -53,6 +56,7 @@ public class XMLMapperEntityResolver implements EntityResolver {
   public InputSource resolveEntity(String publicId, String systemId) throws SAXException {
     try {
       if (systemId != null) {
+        // 解析出文件头中的文件名   调用本地文件资源
         String lowerCaseSystemId = systemId.toLowerCase(Locale.ENGLISH);
         if (lowerCaseSystemId.contains(MYBATIS_CONFIG_SYSTEM) || lowerCaseSystemId.contains(IBATIS_CONFIG_SYSTEM)) {
           return getInputSource(MYBATIS_CONFIG_DTD, publicId, systemId);

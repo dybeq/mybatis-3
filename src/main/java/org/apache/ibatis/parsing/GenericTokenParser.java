@@ -20,7 +20,14 @@ package org.apache.ibatis.parsing;
  */
 public class GenericTokenParser {
 
+  /**
+   * 开始的token字符串
+   */
   private final String openToken;
+
+  /**
+   * 结束的token字符串
+   */
   private final String closeToken;
   private final TokenHandler handler;
 
@@ -35,6 +42,7 @@ public class GenericTokenParser {
       return "";
     }
     // search open token
+    // 开始寻找openToken的位置
     int start = text.indexOf(openToken);
     if (start == -1) {
       return text;
